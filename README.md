@@ -361,41 +361,41 @@ Estoque Fertilizante: 10/10 aplicações
 
 ---
 
-## 📁 Estrutura do Projeto Sugerida
+## 📁 Estrutura do Projeto
 
 <pre>
 fazenda-idle-2.0/
 ├── src/
-│ ├── modelos/
-│ │ ├── Vegetal.java
-│ │ ├── Solo.java
-│ │ ├── Animal.java
-│ │ ├── Cercado.java
-│ │ ├── Fazenda.java
-│ │ └── Maquina.java
-│ ├── vizualização/
-│ │ ├── GamePanel.java
-│ │ ├── HUD.java
-│ │ ├── SpriteManager.java
-│ │ └── AnimationEngine.java
-│ ├── controles/
-│ │ ├── GameController.java
-│ │ ├── PlayerController.java
-│ │ └── AIController.java
-│ └── util/
-│ ├── Constants.java
-│ └── ResourceLoader.java
+│   ├── model/
+│   │   ├── Vegetal.java
+│   │   ├── Solo.java
+│   │   ├── Animal.java
+│   │   ├── Cercado.java
+│   │   ├── Fazenda.java
+│   │   └── Maquina.java
+│   ├── view/
+│   │   ├── GamePainel.java
+│   │   ├── HUD.java
+│   │   ├── GerenciadorDeSprites.java
+│   │   └── AnimationEngine.java
+│   ├── controller/
+│   │   ├── GameControle.java
+│   │   ├── PlayerControle.java
+│   │   └── AIControle.java
+│   └── util/
+│       ├── Constantes.java
+│       └── CarregadorDeRecursos.java
 ├── assets/
-│ ├── sprites/
-│ │ ├── plantas/
-│ │ ├── animais/
-│ │ ├── personagens/
-│ │ └── maquinas/
-│ ├── ui/
-│ └── efeitos/
+│   ├── sprites/
+│   │   ├── plantas/
+│   │   ├── animais/
+│   │   ├── Personagem/
+│   │   └── maquinas/
+│   ├── ui/
+│   └── effects/
 └── docs/
-├── README.md
-└── diagramas/
+    ├── README.md
+    └── diagramas/
 </pre>
 
 ---
