@@ -363,21 +363,22 @@ Estoque Fertilizante: 10/10 aplicações
 
 ## 📁 Estrutura do Projeto Sugerida
 
+<pre>
 fazenda-idle-2.0/
 ├── src/
-│ ├── model/
+│ ├── modelos/
 │ │ ├── Vegetal.java
 │ │ ├── Solo.java
 │ │ ├── Animal.java
 │ │ ├── Cercado.java
 │ │ ├── Fazenda.java
 │ │ └── Maquina.java
-│ ├── view/
+│ ├── vizualização/
 │ │ ├── GamePanel.java
 │ │ ├── HUD.java
 │ │ ├── SpriteManager.java
 │ │ └── AnimationEngine.java
-│ ├── controller/
+│ ├── controles/
 │ │ ├── GameController.java
 │ │ ├── PlayerController.java
 │ │ └── AIController.java
@@ -386,15 +387,16 @@ fazenda-idle-2.0/
 │ └── ResourceLoader.java
 ├── assets/
 │ ├── sprites/
-│ │ ├── plants/
-│ │ ├── animals/
-│ │ ├── character/
-│ │ └── machines/
+│ │ ├── plantas/
+│ │ ├── animais/
+│ │ ├── personagens/
+│ │ └── maquinas/
 │ ├── ui/
-│ └── effects/
+│ └── efeitos/
 └── docs/
 ├── README.md
 └── diagramas/
+</pre>
 
 ---
 
