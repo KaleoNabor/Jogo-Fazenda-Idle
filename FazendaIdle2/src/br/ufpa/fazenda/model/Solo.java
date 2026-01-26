@@ -6,12 +6,13 @@ import java.util.Set;
 
 public class Solo {
     
-    private int id; // Para identificar o solo (0, 1, 2...)
-    private int nivel; // Nível do solo (1-10 conforme documentação)
+    private int id; // Para identificar o solo
+    private int nivel; // Nível do solo (1-10)
     private boolean desbloqueado; // Indica se o solo está desbloqueado
     private Vegetal vegetalPlantado;
     private double progressoCrescimento; // 0.0 a 1.0 (1.0 = pronto)
     
+    //Faze de testes, sera implementado depois na classe maquinas
     // Configurações
     private Set<Maquina> maquinasInstaladas;
     private boolean fertilizanteAtivado; // O interruptor do usuário
