@@ -11,10 +11,9 @@ import javax.swing.JPanel;
 public class PainelFazenda extends JPanel {
 
     private JanelaPrincipal janelaMae;
-    private Image imgGrama, imgLoja, imgCerca, imgSoloArado, imgSoloBloqueado, imgSoloPlantado;
+    private Image imgGrama, imgLoja, imgCerca, imgSoloArado, imgSoloBloqueado, imgSoloPlantado, imgCeleiro;
 
-    // --- ESTADOS DE SELEÇÃO VISUAL ---
-    // -1 significa "nenhum"
+    // ESTADOS DE SELEÇÃO VISUAL
     private int idSoloHover = -1;
     private int idSoloSelecionado = -1;
     
@@ -24,16 +23,14 @@ public class PainelFazenda extends JPanel {
     private boolean lojaHover = false;
     private boolean lojaSelecionada = false;
 
-    // --- MODO DEBUG ---
-    private static final boolean DESENHAR_HITBOXES = false; // Mudei para false para ficar mais bonito agora
+    // Debugar (Hitboxes vermelhas)
+    private static final boolean DESENHAR_HITBOXES = false;
 
-    // =================================================================================
-    // 🎛️ CONFIGURAÇÕES DE LAYOUT
-    // =================================================================================
-    private double LOJA_X = 0.62;     
-    private double LOJA_Y = 0.08;     
-    private double LOJA_W = 0.25;     
-    private double LOJA_H = 0.18;     
+    // CONFIGURAÇÃO DO LAYOUT (Em porcentagem da tela)
+    private double LOJA_X = 0.62;      
+    private double LOJA_Y = 0.08;      
+    private double LOJA_W = 0.25;      
+    private double LOJA_H = 0.18;      
 
     private double SOLO_START_X = 0.06; 
     private double SOLO_START_Y = 0.32; 
@@ -42,15 +39,23 @@ public class PainelFazenda extends JPanel {
     private double SOLO_GAP_X = 0.02;   
     private double SOLO_GAP_Y = 0.02;   
 
-    private double CERCA_Y = 0.70;      
-    private double CERCA_W = 0.20;      
-    private double CERCA_H = 0.20;      
+    private double CERCA_Y = 0.70;       
+    private double CERCA_W = 0.20;       
+    private double CERCA_H = 0.20;       
     private double CERCA_ESPACO_TOTAL = 0.10; 
+
+    // Configuração do Celeiro
+    private double CELEIRO_X = 0.05;
+    private double CELEIRO_Y = 0.05;
+    private double CELEIRO_W = 0.20;
+    private double CELEIRO_H = 0.25;
 
     // Áreas lógicas (Hitboxes)
     private Rectangle areaLoja = new Rectangle();
+    private Rectangle areaCeleiro = new Rectangle();
     private Rectangle[] areaSolos = new Rectangle[Constantes.QTD_SOLOS];
     private Rectangle[] areaCercados = new Rectangle[Constantes.QTD_CERCADOS];
+    
 
     public PainelFazenda(JanelaPrincipal janela) {
         this.janelaMae = janela;
@@ -58,7 +63,7 @@ public class PainelFazenda extends JPanel {
 
         carregarImagens();
 
-        // Listener de Clique
+        // Listener de Cliques
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -66,7 +71,7 @@ public class PainelFazenda extends JPanel {
             }
         });
 
-        // Listener de Movimento (HOVER)
+        // Listener de Movimento (Hover)
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -83,13 +88,14 @@ public class PainelFazenda extends JPanel {
         imgSoloArado = assets.getImagem("solo_arado.png", true);
         imgSoloBloqueado = assets.getImagem("solo_bloqueado.png", true);
         imgSoloPlantado = assets.getImagem("solo_plantado.png", true);
+        imgCeleiro = assets.getImagem("celeiro.png", true);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        // Melhora a qualidade do desenho (anti-aliasing)
+        // Anti-aliasing para deixar bonito
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int w = getWidth();
@@ -108,6 +114,7 @@ public class PainelFazenda extends JPanel {
 
         // --- DESENHA ELEMENTOS ---
         desenharLoja(g2d, areaLoja);
+        desenharCeleiro(g2d, areaCeleiro); // <--- Celeiro desenhado aqui
 
         for (int i = 0; i < Constantes.QTD_SOLOS; i++) {
             desenharSolo(g2d, areaSolos[i], i);
@@ -117,95 +124,20 @@ public class PainelFazenda extends JPanel {
             desenharCercado(g2d, areaCercados[i], i);
         }
         
-        // --- DESENHA CAIXAS DE SELEÇÃO E HOVER (POR CIMA DE TUDO) ---
+        // Desenha os efeitos de seleção por cima de tudo
         desenharEfeitosVisuais(g2d);
     }
-    
-    private void atualizarHitboxes(int w, int h) {
-        // Loja
-        int lX = (int)(w * LOJA_X); int lY = (int)(h * LOJA_Y);
-        int lW = (int)(w * LOJA_W); int lH = (int)(h * LOJA_H);
-        areaLoja.setBounds(lX, lY, lW, lH);
 
-        // Solos
-        int sW = (int)(w * SOLO_SIZE_W); int sH = (int)(h * SOLO_SIZE_H);
-        int gapX = (int)(w * SOLO_GAP_X); int gapY = (int)(w * SOLO_GAP_Y);
-        int startX = (int)(w * SOLO_START_X); int startY = (int)(h * SOLO_START_Y);
+    // --- MÉTODOS DE DESENHO AUXILIARES ---
 
-        for (int i = 0; i < Constantes.QTD_SOLOS; i++) {
-            int row = i / 6; int col = i % 6;
-            int x = startX + (col * (sW + gapX));
-            int y = startY + (row * (sH + gapY));
-            if (areaSolos[i] == null) areaSolos[i] = new Rectangle();
-            areaSolos[i].setBounds(x, y, sW, sH);
+    private void desenharCeleiro(Graphics2D g, Rectangle r) {
+        if (DESENHAR_HITBOXES) {
+            g.setColor(Color.RED); g.drawRect(r.x, r.y, r.width, r.height);
         }
-
-        // Cercados
-        int cW = (int)(w * CERCA_W); int cH = (int)(h * CERCA_H);
-        int cY = (int)(h * CERCA_Y);
-        int espacoEntreCercas = (int)(w * CERCA_ESPACO_TOTAL);
-        int larguraTotalOcupada = (Constantes.QTD_CERCADOS * cW) + ((Constantes.QTD_CERCADOS - 1) * espacoEntreCercas);
-        int cXInicial = (w - larguraTotalOcupada) / 2;
-
-        for (int i = 0; i < Constantes.QTD_CERCADOS; i++) {
-            int x = cXInicial + (i * (cW + espacoEntreCercas));
-            if (areaCercados[i] == null) areaCercados[i] = new Rectangle();
-            areaCercados[i].setBounds(x, cY, cW, cH);
+        if (imgCeleiro != null) {
+            g.drawImage(imgCeleiro, r.x, r.y, r.width, r.height, null);
         }
     }
-
-    // --- LÓGICA DE VISUALIZAÇÃO DE HOVER E SELECT ---
-    private void desenharEfeitosVisuais(Graphics2D g2d) {
-        // Configurações de estilo
-        Stroke linhaFina = new BasicStroke(2.0f); // Hover
-        Stroke linhaGrossa = new BasicStroke(4.0f); // Selecionado
-        Color corBranca = Color.WHITE;
-        Color corHover = new Color(255, 255, 255, 180); // Branco transparente
-
-        // 1. LOJA
-        if (lojaSelecionada) {
-            g2d.setColor(corBranca);
-            g2d.setStroke(linhaGrossa);
-            g2d.drawRect(areaLoja.x, areaLoja.y, areaLoja.width, areaLoja.height);
-        } else if (lojaHover) {
-            g2d.setColor(corHover);
-            g2d.setStroke(linhaFina);
-            g2d.drawRect(areaLoja.x, areaLoja.y, areaLoja.width, areaLoja.height);
-        }
-
-        // 2. SOLOS
-        for (int i = 0; i < Constantes.QTD_SOLOS; i++) {
-            Rectangle r = areaSolos[i];
-            if (i == idSoloSelecionado) {
-                g2d.setColor(corBranca);
-                g2d.setStroke(linhaGrossa);
-                g2d.drawRect(r.x, r.y, r.width, r.height);
-            } else if (i == idSoloHover) {
-                g2d.setColor(corHover);
-                g2d.setStroke(linhaFina);
-                g2d.drawRect(r.x, r.y, r.width, r.height);
-            }
-        }
-
-        // 3. CERCADOS
-        for (int i = 0; i < Constantes.QTD_CERCADOS; i++) {
-            Rectangle r = areaCercados[i];
-            if (i == idCercadoSelecionado) {
-                g2d.setColor(corBranca);
-                g2d.setStroke(linhaGrossa);
-                g2d.drawRect(r.x, r.y, r.width, r.height);
-            } else if (i == idCercadoHover) {
-                g2d.setColor(corHover);
-                g2d.setStroke(linhaFina);
-                g2d.drawRect(r.x, r.y, r.width, r.height);
-            }
-        }
-        
-        // Reseta o stroke para o padrão
-        g2d.setStroke(new BasicStroke(1.0f));
-    }
-
-    // --- MÉTODOS DE DESENHO (Conteúdo) ---
 
     private void desenharLoja(Graphics2D g, Rectangle r) {
         if (DESENHAR_HITBOXES) {
@@ -245,7 +177,7 @@ public class PainelFazenda extends JPanel {
 
         if (baseSolo != null) g.drawImage(baseSolo, r.x, r.y, r.width, r.height, null);
 
-        // Fallbacks e Barras
+        // Barras de progresso e ícones
         if (solo.isOcupado()) {
             if (!solo.isPronto() && imgSoloPlantado == null) {
                 g.setColor(new Color(34, 139, 34));
@@ -344,7 +276,86 @@ public class PainelFazenda extends JPanel {
         }
     }
 
-    // --- PROCESSAMENTO DE ENTRADA ---
+    private void atualizarHitboxes(int w, int h) {
+        // Celeiro (Primeiro para garantir)
+        int celX = (int)(w * CELEIRO_X); 
+        int celY = (int)(h * CELEIRO_Y);
+        int celW = (int)(w * CELEIRO_W); 
+        int celH = (int)(h * CELEIRO_H);
+        areaCeleiro.setBounds(celX, celY, celW, celH);
+
+        // Loja
+        int lX = (int)(w * LOJA_X); int lY = (int)(h * LOJA_Y);
+        int lW = (int)(w * LOJA_W); int lH = (int)(h * LOJA_H);
+        areaLoja.setBounds(lX, lY, lW, lH);
+
+        // Solos
+        int sW = (int)(w * SOLO_SIZE_W); int sH = (int)(h * SOLO_SIZE_H);
+        int gapX = (int)(w * SOLO_GAP_X); int gapY = (int)(w * SOLO_GAP_Y);
+        int startX = (int)(w * SOLO_START_X); int startY = (int)(h * SOLO_START_Y);
+
+        for (int i = 0; i < Constantes.QTD_SOLOS; i++) {
+            int row = i / 6; int col = i % 6;
+            int x = startX + (col * (sW + gapX));
+            int y = startY + (row * (sH + gapY));
+            if (areaSolos[i] == null) areaSolos[i] = new Rectangle();
+            areaSolos[i].setBounds(x, y, sW, sH);
+        }
+
+        // Cercados
+        int cW = (int)(w * CERCA_W); int cH = (int)(h * CERCA_H);
+        int cY = (int)(h * CERCA_Y);
+        int espacoEntreCercas = (int)(w * CERCA_ESPACO_TOTAL);
+        int larguraTotalOcupada = (Constantes.QTD_CERCADOS * cW) + ((Constantes.QTD_CERCADOS - 1) * espacoEntreCercas);
+        int cXInicial = (w - larguraTotalOcupada) / 2;
+
+        for (int i = 0; i < Constantes.QTD_CERCADOS; i++) {
+            int x = cXInicial + (i * (cW + espacoEntreCercas));
+            if (areaCercados[i] == null) areaCercados[i] = new Rectangle();
+            areaCercados[i].setBounds(x, cY, cW, cH);
+        }
+    }
+
+    private void desenharEfeitosVisuais(Graphics2D g2d) {
+        Stroke linhaFina = new BasicStroke(2.0f);
+        Stroke linhaGrossa = new BasicStroke(4.0f);
+        Color corBranca = Color.WHITE;
+        Color corHover = new Color(255, 255, 255, 180);
+
+        // LOJA
+        if (lojaSelecionada) {
+            g2d.setColor(corBranca); g2d.setStroke(linhaGrossa);
+            g2d.drawRect(areaLoja.x, areaLoja.y, areaLoja.width, areaLoja.height);
+        } else if (lojaHover) {
+            g2d.setColor(corHover); g2d.setStroke(linhaFina);
+            g2d.drawRect(areaLoja.x, areaLoja.y, areaLoja.width, areaLoja.height);
+        }
+
+        // SOLOS
+        for (int i = 0; i < Constantes.QTD_SOLOS; i++) {
+            Rectangle r = areaSolos[i];
+            if (i == idSoloSelecionado) {
+                g2d.setColor(corBranca); g2d.setStroke(linhaGrossa);
+                g2d.drawRect(r.x, r.y, r.width, r.height);
+            } else if (i == idSoloHover) {
+                g2d.setColor(corHover); g2d.setStroke(linhaFina);
+                g2d.drawRect(r.x, r.y, r.width, r.height);
+            }
+        }
+
+        // CERCADOS
+        for (int i = 0; i < Constantes.QTD_CERCADOS; i++) {
+            Rectangle r = areaCercados[i];
+            if (i == idCercadoSelecionado) {
+                g2d.setColor(corBranca); g2d.setStroke(linhaGrossa);
+                g2d.drawRect(r.x, r.y, r.width, r.height);
+            } else if (i == idCercadoHover) {
+                g2d.setColor(corHover); g2d.setStroke(linhaFina);
+                g2d.drawRect(r.x, r.y, r.width, r.height);
+            }
+        }
+        g2d.setStroke(new BasicStroke(1.0f));
+    }
 
     private void processarHover(int x, int y) {
         int oldSolo = idSoloHover;
@@ -374,7 +385,6 @@ public class PainelFazenda extends JPanel {
             }
         }
 
-        // Redesenha apenas se mudou alguma coisa (otimização)
         if (oldSolo != idSoloHover || oldCercado != idCercadoHover || oldLoja != lojaHover) {
             repaint();
         }
@@ -403,7 +413,7 @@ public class PainelFazenda extends JPanel {
         janelaMae.selecionarGeral();
     }
     
-    // --- SETTERS DE ESTADO (Chamados pela JanelaPrincipal) ---
+    // --- SETTERS DE ESTADO ---
     
     public void setSoloSelecionado(int id) {
         this.idSoloSelecionado = id;
