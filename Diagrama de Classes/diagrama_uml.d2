@@ -1,0 +1,260 @@
+# Diagrama UML – Jogo de Fazenda Idle
+# Estilo idêntico ao modelo fornecido (chaves com aspas)
+
+FazendaEstado: {
+  shape: class
+  label: "FazendaEstado"
+  "- dinheiro: double"
+  "- diaAtual: int"
+  "- estoqueFertilizante: int"
+  "- solos: List<Solo>"
+  "- cercados: List<Cercado>"
+  "- inventarioMaquinas: Map<Maquina,Integer>"
+  "- ultimoVegetalPlantado: Vegetal"
+  "- vitoriaAlcancada: boolean"
+  "+ getInstance(): FazendaEstado"
+  "+ consumirFertilizanteDoEstoque(): boolean"
+  "+ comprarMaquinaComVerificacao(m: Maquina): int"
+  "+ comprarAnimalComVerificacao(a: Animal): int"
+  "+ evoluirSolo(id: int): boolean"
+  "+ desbloquearSolo(id: int): boolean"
+  "+ ganharDinheiro(v: double): void"
+  "+ gastarDinheiro(v: double): boolean"
+  "+ plantarManual(id: int, v: Vegetal): boolean"
+  "+ instalarMaquina(id: int, m: Maquina): boolean"
+  "+ desinstalarMaquina(id: int, m: Maquina): void"
+  "+ getSolos(): List<Solo>"
+  "+ getCercados(): List<Cercado>"
+  "+ getInventarioMaquinas(): Map<Maquina,Integer>"
+}
+
+Solo: {
+  shape: class
+  label: "Solo"
+  "- id: int"
+  "- nivel: int"
+  "- desbloqueado: boolean"
+  "- vegetalPlantado: Vegetal"
+  "- progressoCrescimento: double"
+  "- maquinasInstaladas: Set<Maquina>"
+  "- fertilizanteAtivado: boolean"
+  "- estaComFertilizanteAplicado: boolean"
+  "- bloqueadoReplantioAutomatico: boolean"
+  "+ plantar(v: Vegetal, auto: boolean): boolean"
+  "+ atualizarTempo(delta: double): void"
+  "+ calcularValorVenda(): double"
+  "+ colher(): double"
+  "+ arrancar(): void"
+  "+ aplicarFertilizante(): boolean"
+  "+ instalarMaquina(m: Maquina): void"
+  "+ removerMaquina(m: Maquina): void"
+  "+ upgrade(): boolean"
+  "+ desbloquear(): boolean"
+}
+
+Cercado: {
+  shape: class
+  label: "Cercado"
+  "- id: int"
+  "- especie: Animal"
+  "- quantidadeAnimais: int"
+  "- progressoProducao: double"
+  "- produtoPronto: boolean"
+  "+ adicionarAnimal(a: Animal): boolean"
+  "+ atualizarTempo(delta: double): void"
+  "+ coletarProdutos(): double"
+  "+ calcularCustoManutencao(): double"
+}
+
+Animal: {
+  shape: class
+  label: "(enum) Animal"
+  "GALINHA"
+  "OVELHA"
+  "VACA"
+  "+ getNome(): String"
+  "+ getProduto(): String"
+  "+ getCustoManutencaoDiaria(): double"
+  "+ getProdutoValor(): double"
+  "+ getTempoProducaoSegundos(): double"
+  "+ getPrecoCompra(): double"
+}
+
+Vegetal: {
+  shape: class
+  label: "(enum) Vegetal"
+  "ALFACE"
+  "CENOURA"
+  "ABOBORA"
+  "+ getNome(): String"
+  "+ getNivelMinimo(): int"
+  "+ getDiasParaCrescer(): int"
+  "+ getValorVenda(): double"
+  "+ getTempoEmSegundos(): long"
+}
+
+Maquina: {
+  shape: class
+  label: "(enum) Maquina"
+  "TRATOR"
+  "ARADOR"
+  "IRRIGADOR"
+  "+ getNome(): String"
+  "+ getCusto(): double"
+  "+ getDescricao(): String"
+  "+ aplicarBonusValor(base: double): double"
+  "+ aplicarReducaoTempo(total: double): double"
+}
+
+GameLoop: {
+  shape: class
+  label: "GameLoop (Thread)"
+  "- rodando: boolean"
+  "- pausado: boolean"
+  "- fazenda: FazendaEstado"
+  "- personagemIA: PersonagemIA"
+  "- ouvinte: GerenciadorEventos"
+  "+ run(): void"
+  "+ alternarPause(): void"
+  "+ parar(): void"
+  "+ ativarIA(): void"
+  "+ desativarIA(): void"
+}
+
+GerenciadorEventos: {
+  shape: class
+  label: "(interface) GerenciadorEventos"
+  "+ aoAtualizarStatusFazenda(dinheiro: double, dia: int, fert: int): void"
+  "+ aoAtualizarSolo(solo: Solo): void"
+  "+ aoNotificarEvento(msg: String): void"
+  "+ aoVencerJogo(): void"
+}
+
+ExecutorTarefas: {
+  shape: class
+  label: "ExecutorTarefas (Singleton)"
+  "- executor: ExecutorService"
+  "+ getInstance(): ExecutorTarefas"
+  "+ executar(r: Runnable): void"
+  "+ executarComResultado(c: Callable): Future"
+  "+ parar(): void"
+}
+
+PersonagemIA: {
+  shape: class
+  label: "PersonagemIA"
+  "- ativo: boolean"
+  "- fazenda: FazendaEstado"
+  "- filaTarefas: PriorityQueue<Decisao>"
+  "- tempoUltimaAcao: double"
+  "+ ativar(): void"
+  "+ desativar(): void"
+  "+ atualizar(delta: double): boolean"
+}
+
+JanelaPrincipal: {
+  shape: class
+  label: "JanelaPrincipal (JFrame)"
+  "- painelFazenda: PainelFazenda"
+  "- painelLateral: PainelLateral"
+  "- gameLoop: GameLoop"
+  "- timerUI: Timer"
+  "- executor: ExecutorTarefas"
+  "+ actionPerformed(e: ActionEvent): void"
+  "+ selecionarSolo(id: int): void"
+  "+ selecionarLoja(): void"
+  "+ selecionarCercado(id: int): void"
+  "+ selecionarGeral(): void"
+}
+
+PainelFazenda: {
+  shape: class
+  label: "PainelFazenda (JPanel)"
+  "- areaLoja: Rectangle"
+  "- areaCeleiro: Rectangle"
+  "- areaSolos: Rectangle[]"
+  "- areaCercados: Rectangle[]"
+  "- idSoloSelecionado: int"
+  "- idCercadoSelecionado: int"
+  "+ paintComponent(g: Graphics): void"
+  "+ setSoloSelecionado(id: int): void"
+  "+ setCercadoSelecionado(id: int): void"
+  "+ setLojaSelecionada(): void"
+  "+ limparSelecao(): void"
+}
+
+PainelLateral: {
+  shape: class
+  label: "PainelLateral (JPanel)"
+  "- layoutCartas: CardLayout"
+  "- painelConteudo: JPanel"
+  "- soloAtualVisualizado: Solo"
+  "- cercadoAtualVisualizado: Cercado"
+  "+ mostrarMenuSolo(solo: Solo): void"
+  "+ mostrarCercado(id: int): void"
+  "+ mostrarLoja(): void"
+  "+ mostrarGeral(): void"
+  "+ atualizarDadosDinamicos(): void"
+  "+ atualizarHUD(dinheiro: double, dia: int, fert: int): void"
+}
+
+RenderizadorAssets: {
+  shape: class
+  label: "RenderizadorAssets (Singleton)"
+  "- cacheImagens: Map<String,Image>"
+  "- imagensAusentes: Set<String>"
+  "+ get(): RenderizadorAssets"
+  "+ getImagem(nome: String): Image"
+  "+ getIcone(nome: String, w: int, h: int): Image"
+}
+
+Constantes: {
+  shape: class
+  label: "Constantes (estático)"
+  "+ DINHEIRO_INICIAL = 2000.0"
+  "+ DINHEIRO_VITORIA = 100000.0"
+  "+ CUSTO_DESBLOQUEIO_SOLO = 300.0"
+  "+ CUSTO_EVOLUCAO_BASE = 100.0"
+  "+ SEGUNDOS_POR_DIA = 15"
+  "+ BONUS_IRRIGADOR_VALOR = 0.25"
+}
+
+App: {
+  shape: class
+  label: "App"
+  "+ main(args: String[]): void"
+}
+
+# ============================================================
+# RELACIONAMENTOS (SETAS)
+# ============================================================
+
+App -> JanelaPrincipal: "instancia"
+
+JanelaPrincipal -> GameLoop: "possui"
+JanelaPrincipal -> ExecutorTarefas: "usa"
+JanelaPrincipal -> PainelFazenda: "contém"
+JanelaPrincipal -> PainelLateral: "contém"
+JanelaPrincipal -> GerenciadorEventos: "implementa"
+
+GameLoop -> FazendaEstado: "usa"
+GameLoop -> PersonagemIA: "possui"
+
+PersonagemIA -> FazendaEstado: "usa"
+
+FazendaEstado -> Solo: "contém List<Solo>"
+FazendaEstado -> Cercado: "contém List<Cercado>"
+FazendaEstado -> Maquina: "inventário Map"
+
+Solo -> Vegetal: "plantado"
+Solo -> Maquina: "instaladas Set"
+
+Cercado -> Animal: "espécie"
+
+PainelFazenda -> RenderizadorAssets: "usa"
+
+PainelLateral -> Solo: "visualiza"
+PainelLateral -> Cercado: "visualiza"
+
+GameLoop -> GerenciadorEventos: "notifica"
+
